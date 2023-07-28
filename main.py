@@ -1,16 +1,49 @@
-# This is a sample Python script.
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import urlparse, parse_qs
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+# параметры подключения
+hostName = "localhost"
+serverPort = 8080
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+class MyServer(BaseHTTPRequestHandler):
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    def __get_html_content(self):
+        """
+        Считывает содержимое html файла
+        :return:
+        """
+        html_file = 'homework.html'
+        with open(html_file, "r", encoding="utf-8") as file:
+            html_content = file.read()
+
+        return html_content
+
+    def do_GET(self):
+        """
+        Обрабатывает запросы на сервер
+        :return:
+        """
+
+        shop_html = self.__get_html_content()
+
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")  # Тип данных, передаваемых в запросе
+        self.end_headers()
+        self.wfile.write(bytes(shop_html, "utf-8"))  # Вывод информации
+
+
+if __name__ == "__main__":
+    # Инициализация веб-сервера, который будет по заданным параметрам в сети
+    # принимать запросы и отправлять их на обработку в классе MyServer
+    webServer = HTTPServer((hostName, serverPort), MyServer)
+    print("Server started http://%s:%s" % (hostName, serverPort))
+
+    try:
+        webServer.serve_forever()  # Cтарт веб-сервера в бесконечном цикле запросов
+    except KeyboardInterrupt:
+        pass
+
+    # Остановка веб-сервера, чтобы он освободил адрес и порт в сети, которые занимал
+    webServer.server_close()
+    print("Server stopped.")
